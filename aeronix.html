@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AeroNix OS Project</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #1d1a16;
+    --bg-2: #17140f;
+    --panel: #26221b;
+    --panel-2: #2f2a22;
+    --line: rgba(243,237,228,0.10);
+    --line-strong: rgba(243,237,228,0.18);
+    --text: #f3ede4;
+    --text-dim: #b6ac9d;
+    --text-faint: #7d7566;
+    --accent: #e8a33d;
+    --accent-soft: rgba(232,163,61,0.14);
+    --accent-ink: #1d1a16;
+    --tag: #7c94a8;
+    --tag-soft: rgba(124,148,168,0.14);
+    --shadow: 0 1px 0 rgba(0,0,0,0.4);
+    --radius: 3px;
+  }
+  :root:not([data-theme="light"]){
+    /* dark is default already */
+  }
+  :root[data-theme="light"]{
+    --bg: #f4efe6;
+    --bg-2: #ece5d7;
+    --panel: #fffdf9;
+    --panel-2: #f6f0e6;
+    --line: rgba(29,26,22,0.12);
+    --line-strong: rgba(29,26,22,0.22);
+    --text: #201c16;
+    --text-dim: #5a5346;
+    --text-faint: #8c8271;
+    --accent: #b9701f;
+    --accent-soft: rgba(185,112,31,0.12);
+    --accent-ink: #fffaf2;
+    --tag: #3f5a70;
+    --tag-soft: rgba(63,90,112,0.10);
+    --shadow: 0 1px 0 rgba(29,26,22,0.08);
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg: #f4efe6;
+      --bg-2: #ece5d7;
+      --panel: #fffdf9;
+      --panel-2: #f6f0e6;
+      --line: rgba(29,26,22,0.12);
+      --line-strong: rgba(29,26,22,0.22);
+      --text: #201c16;
+      --text-dim: #5a5346;
+      --text-faint: #8c8271;
+      --accent: #b9701f;
+      --accent-soft: rgba(185,112,31,0.12);
+      --accent-ink: #fffaf2;
+      --tag: #3f5a70;
+      --tag-soft: rgba(63,90,112,0.10);
+      --shadow: 0 1px 0 rgba(29,26,22,0.08);
+    }
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse 900px 500px at 15% -10%, var(--accent-soft), transparent 60%),
+      linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+    color: var(--text);
+    font-family: "Zen Kaku Gothic New", "Hiragino Sans", sans-serif;
+    line-height: 1.85;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+  .mono{ font-family: "JetBrains Mono", ui-monospace, monospace; }
+  a{ color: inherit; }
+  img{ max-width:100%; display:block; }
+
+  .wrap{ max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- Nav ---------- */
+  header.topbar{
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: blur(10px);
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar-inner{
+    display:flex; align-items:center; justify-content:space-between;
+    height: 64px;
+  }
+  .brand{ display:flex; align-items:center; gap:10px; font-weight:700; font-size:1.05rem; letter-spacing:0.01em; text-decoration:none; }
+  .brand-mark{
+    width:18px; height:18px; border-radius: 4px;
+    background: linear-gradient(135deg, var(--accent), var(--tag));
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.15);
+    flex: none;
+  }
+  nav.mainnav{ display:flex; align-items:center; gap: 28px; }
+  nav.mainnav a{
+    text-decoration:none; color: var(--text-dim); font-size:0.92rem; font-weight:500;
+    padding: 6px 2px; border-bottom: 1px solid transparent;
+    transition: color .15s ease, border-color .15s ease;
+  }
+  nav.mainnav a:hover{ color: var(--text); border-color: var(--line-strong); }
+  .nav-actions{ display:flex; align-items:center; gap:12px; }
+  .btn{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family: inherit; font-weight:700; font-size:0.88rem;
+    padding: 9px 16px; border-radius: var(--radius);
+    text-decoration:none; border:1px solid transparent; cursor:pointer;
+    transition: transform .12s ease, filter .15s ease, background .15s ease;
+  }
+  .btn:active{ transform: translateY(1px); }
+  .btn-accent{ background: var(--accent); color: var(--accent-ink); }
+  .btn-accent:hover{ filter: brightness(1.08); }
+  .btn-ghost{ background: transparent; color: var(--text); border-color: var(--line-strong); }
+  .btn-ghost:hover{ background: var(--panel); }
+  .theme-toggle{
+    width:34px; height:34px; border-radius: var(--radius);
+    border:1px solid var(--line-strong); background: var(--panel);
+    color: var(--text-dim); font-size:0.95rem; cursor:pointer; flex:none;
+  }
+  .burger{ display:none; }
+
+  /* ---------- Window chrome panels ---------- */
+  .win{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .win-bar{
+    display:flex; align-items:center; gap:10px;
+    padding: 10px 16px;
+    background: var(--panel-2);
+    border-bottom: 1px solid var(--line);
+  }
+  .win-dots{ display:flex; gap:5px; flex:none; }
+  .win-dots span{ width:6px; height:6px; border-radius:1px; background: var(--text-faint); display:block; }
+  .win-title{ font-size:0.76rem; color: var(--text-faint); letter-spacing: 0.02em; }
+
+  /* ---------- Hero ---------- */
+  .hero{ padding: 96px 0 80px; }
+  .hero-eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size: 0.8rem; color: var(--text-dim);
+    border: 1px solid var(--line-strong); border-radius: var(--radius);
+    padding: 5px 10px; margin-bottom: 28px;
+  }
+  .hero-eyebrow .dot{ width:6px; height:6px; border-radius:50%; background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  h1.hero-title{
+    font-size: clamp(2.4rem, 5.4vw, 4.1rem);
+    font-weight: 900; letter-spacing: -0.01em;
+    line-height: 1.25; max-width: 12ch;
+    opacity:0; transform: translateY(14px);
+    animation: rise .7s ease forwards;
+  }
+  .hero-sub{
+    margin-top: 22px; font-size: 1.06rem; color: var(--text-dim);
+    max-width: 34ch;
+    opacity:0; transform: translateY(14px);
+    animation: rise .7s ease .12s forwards;
+  }
+  .cursor{
+    display:inline-block; width:9px; height:1.1em; background: var(--accent);
+    margin-left: 4px; vertical-align: -0.15em;
+    animation: blink 1s steps(1) infinite;
+  }
+  .hero-ctas{
+    margin-top: 34px; display:flex; gap:12px; flex-wrap:wrap;
+    opacity:0; transform: translateY(14px);
+    animation: rise .7s ease .24s forwards;
+  }
+  @keyframes rise{ to{ opacity:1; transform:none; } }
+  @keyframes blink{ 50%{ opacity:0; } }
+  @media (prefers-reduced-motion: reduce){
+    h1.hero-title, .hero-sub, .hero-ctas{ animation:none; opacity:1; transform:none; }
+    .cursor{ animation:none; }
+  }
+
+  .hero-panel{
+    margin-top: 56px;
+  }
+  .hero-panel .win-body{ padding: 22px 22px 4px; display:grid; grid-template-columns: repeat(3,1fr); gap: 18px; }
+  .stack-card{ border:1px solid var(--line); border-radius: var(--radius); padding: 16px; background: var(--bg); }
+  .stack-tag{
+    display:inline-block; font-family:"JetBrains Mono",monospace; font-size:0.7rem;
+    color: var(--tag); background: var(--tag-soft); border-radius: var(--radius);
+    padding: 3px 7px; margin-bottom: 10px;
+  }
+  .stack-card h4{ font-size:0.98rem; font-weight:700; margin-bottom:6px; }
+  .stack-card p{ font-size:0.86rem; color: var(--text-dim); line-height:1.7; }
+
+  /* ---------- Sections ---------- */
+  section{ padding: 64px 0; }
+  section.alt{ background: color-mix(in srgb, var(--panel) 40%, transparent); border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+  .section-head{ margin-bottom: 36px; max-width: 46ch; }
+  .section-kicker{
+    font-family:"JetBrains Mono",monospace; font-size:0.76rem; color: var(--tag);
+    margin-bottom: 10px;
+  }
+  .section-head h2{ font-size: clamp(1.5rem, 2.6vw, 2.1rem); font-weight: 700; letter-spacing:-0.01em; }
+  .section-head p{ margin-top: 12px; color: var(--text-dim); font-size:0.98rem; }
+
+  .grid3{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .grid2{ display:grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+
+  .card{ padding: 22px; }
+  .card .win-body{ padding: 20px; }
+  .card h3{ font-size: 1.02rem; font-weight:700; margin-bottom:10px; }
+  .card p{ color: var(--text-dim); font-size: 0.92rem; }
+
+  .split{
+    display:grid; grid-template-columns: 1.1fr 0.9fr; gap: 40px; align-items:center;
+  }
+  .split-copy h2{ font-size: clamp(1.5rem, 2.4vw, 2rem); font-weight:700; margin-bottom: 16px; }
+  .split-copy p{ color: var(--text-dim); margin-bottom: 12px; }
+  .founder-tag{
+    display:inline-flex; align-items:center; gap:8px; font-family:"JetBrains Mono",monospace;
+    font-size:0.76rem; color:var(--accent); border:1px solid var(--line-strong);
+    padding:5px 10px; border-radius: var(--radius); margin-bottom:18px;
+  }
+
+  .team-quote{
+    border-left: 2px solid var(--accent);
+    padding: 4px 0 4px 18px; color: var(--text-dim); font-size:0.95rem; margin-top:10px;
+  }
+
+  footer{
+    border-top: 1px solid var(--line); padding: 40px 0 48px;
+  }
+  .footer-inner{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; }
+  .footer-brand{ display:flex; align-items:center; gap:10px; font-weight:700; }
+  footer p.note{ color: var(--text-faint); font-size:0.82rem; margin-top: 18px; }
+
+  @media (max-width: 900px){
+    .grid3{ grid-template-columns: 1fr 1fr; }
+    .split{ grid-template-columns: 1fr; }
+    .hero-panel .win-body{ grid-template-columns: 1fr; }
+  }
+  @media (max-width: 680px){
+    nav.mainnav, .nav-actions .btn-ghost{ display:none; }
+    .burger{
+      display:inline-flex; width:36px; height:36px; align-items:center; justify-content:center;
+      border:1px solid var(--line-strong); border-radius: var(--radius); background: var(--panel);
+      cursor:pointer; flex:none;
+    }
+    .burger span, .burger span::before, .burger span::after{
+      content:""; display:block; width:16px; height:1.5px; background: var(--text); position:relative;
+    }
+    .burger span::before{ position:absolute; top:-5px; }
+    .burger span::after{ position:absolute; top:5px; }
+    body.nav-open nav.mainnav{
+      display:flex; flex-direction:column; align-items:flex-start; gap: 4px;
+      position:fixed; top:64px; left:0; right:0; background: var(--bg);
+      border-bottom:1px solid var(--line); padding: 12px 24px 20px; z-index:49;
+    }
+    .grid3, .grid2{ grid-template-columns: 1fr; }
+    .hero{ padding: 64px 0 56px; }
+    .footer-inner{ flex-direction:column; align-items:flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <a href="#top" class="brand"><span class="brand-mark"></span>AeroNix OS Project</a>
+    <nav class="mainnav">
+      <a href="#home">ホーム</a>
+      <a href="#point">ここがいい</a>
+      <a href="#funding">クラファン</a>
+      <a href="#team">チーム</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="theme-toggle" id="themeToggle" aria-label="配色を切り替え" title="配色を切り替え">◐</button>
+      <a class="btn btn-ghost" href="https://discord.gg/6HhSrXMFnX" target="_blank" rel="noopener">Discord</a>
+      <button class="burger" id="burgerBtn" aria-label="メニュー"><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HOME -->
+  <section id="home" class="hero">
+    <div class="wrap">
+      <span class="hero-eyebrow"><span class="dot"></span>開発者募集中・中高生中心のチーム「Arix」</span>
+      <h1 class="hero-title">世界一とは<br>言わない。</h1>
+      <p class="hero-sub">誰でも使いやすいOSを目指しています。本来は開発者向けですが、どんな方でも使えるように尽くします<span class="cursor"></span></p>
+      <div class="hero-ctas">
+        <a class="btn btn-accent" href="https://discord.gg/6HhSrXMFnX" target="_blank" rel="noopener">公式Discordに参加する</a>
+        <a class="btn btn-ghost" href="#point">AeroNixのここがいい</a>
+      </div>
+
+      <div class="win hero-panel">
+        <div class="win-bar"><div class="win-dots"><span></span><span></span><span></span></div><div class="win-title mono">design_goals.sys</div></div>
+        <div class="win-body">
+          <div class="stack-card">
+            <span class="stack-tag">UI</span>
+            <h4>Windowsのように洗練</h4>
+            <p>慣れ親しんだ操作感を大切にした、迷わないインターフェース。</p>
+          </div>
+          <div class="stack-card">
+            <span class="stack-tag">見た目</span>
+            <h4>macOSのように美しく</h4>
+            <p>細部まで整えられた、見ていて気持ちのいいデザイン。</p>
+          </div>
+          <div class="stack-card">
+            <span class="stack-tag">動作</span>
+            <h4>Linuxのように軽量</h4>
+            <p>古い端末でも快適に動く、無駄のない軽さ。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 開発者募集 -->
+  <section class="alt">
+    <div class="wrap">
+      <div class="win card">
+        <div class="win-bar"><div class="win-dots"><span></span><span></span><span></span></div><div class="win-title mono">recruit.log</div></div>
+        <div class="win-body" style="display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap;">
+          <div style="max-width:52ch;">
+            <h3 style="font-size:1.2rem; margin-bottom:8px;">開発者募集</h3>
+            <p style="color:var(--text-dim);">本プロジェクトの開発チーム、Arixは現在もソフトウェア等の開発者を中高生を中心に募集しています。</p>
+          </div>
+          <a class="btn btn-accent" href="https://discord.gg/6HhSrXMFnX" target="_blank" rel="noopener">公式Discord</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 開発者について -->
+  <section>
+    <div class="wrap split">
+      <div class="split-copy">
+        <span class="founder-tag mono">FOUNDER</span>
+        <h2>開発者</h2>
+        <p>本プロジェクトの開発、立案者は現役中学生YouTuberである「YT_hamahugu1234」氏率いる開発チーム、Arixにより立ち上げられました。</p>
+        <a class="btn btn-ghost" href="#point">最新情報を入手する</a>
+      </div>
+      <div style="display:grid; gap:16px;">
+        <div class="win">
+          <div class="win-bar"><div class="win-dots"><span></span><span></span><span></span></div><div class="win-title mono">team.md</div></div>
+          <div class="win-body" style="padding:18px;">
+            <h4 style="font-size:0.98rem; margin-bottom:8px;">開発チームについて</h4>
+            <p style="color:var(--text-dim); font-size:0.9rem;">中高生を中心に募集され、集められたプログラマーです。プログラマーだけでなく、デザイン、音、調整等の役割を担うメンバーもいます。</p>
+          </div>
+        </div>
+        <div class="win">
+          <div class="win-bar"><div class="win-dots"><span></span><span></span><span></span></div><div class="win-title mono">self_taught.md</div></div>
+          <div class="win-body" style="padding:18px;">
+            <h4 style="font-size:0.98rem; margin-bottom:8px;">独学による開発</h4>
+            <p style="color:var(--text-dim); font-size:0.9rem;">OSプログラムのメイン開発者であるYT_hamahugu1234氏は、すべて独学で学習し、プログラムしています。プログラムが分からない方でもArixに参加できます。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ここがいい -->
+  <section id="point" class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="section-kicker mono">// WHY AERONIX</div>
+        <h2>AeroNixのここがいい</h2>
+      </div>
+      <div class="grid3">
+        <div class="win card">
+          <div class="win-bar"><div class="win-dots"><span></span><span></span><span></span></div><div class="win-title mono">exe_support.sys</div></div>
+          <div class="win-body"><h3>exeファイル等</h3><p>Windowsで動作するexe、bat等が標準で動作します。</p></div>
+        </div>
+        <div class="win card">
+          <div class="win-bar"><div class="win-dots"><span></span><span></span><span></span></div><div class="win-title mono">lightweight.sys</div></div>
+          <div class="win-body"><h3>圧倒的軽さ</h3><p>Linuxベースのため、安定した軽さを実現しています。</p></div>
+        </div>
+        <div class="win card">
+          <div class="win-bar"><div class="win-dots"><span></span><span></span><span></span></div><div class="win-title mono">price.sys</div></div>
+          <div class="win-body"><h3>無料（今のとこ）</h3><p>無料です。何かあった際はできる範囲でサポートしますが、大規模な対応には時間がかかります。</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- クラファン -->
+  <section id="funding">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="section-kicker mono">// CROWDFUNDING (実施の場合)</div>
+        <h2>クラファン</h2>
+        <p>実施する場合に想定している特典です。現時点でメリットは限定的なので、無理な加入は必要ありません。</p>
+      </div>
+      <div class="grid3">
+        <div class="win card">
+          <div class="win-bar"><div class="win-dots"><span></span><span></span><span></span></div><div class="win-title mono">early_update.cfg</div></div>
+          <div class="win-body"><h3>先行アップデート</h3><p>先行してアップデートが配布されます。ただしエラー等が出る可能性があるため、あまりおすすめはしません。</p></div>
+        </div>
+        <div class="win card">
+          <div class="win-bar"><div class="win-dots"><span></span><span></span><span></span></div><div class="win-title mono">support.cfg</div></div>
+          <div class="win-body"><h3>平等なサポート</h3><p>クラファンに入っているからといって、サポートが優先される訳ではありません。</p></div>
+        </div>
+        <div class="win card">
+          <div class="win-bar"><div class="win-dots"><span></span><span></span><span></span></div><div class="win-title mono">preview.cfg</div></div>
+          <div class="win-body"><h3>先行したシステム</h3><p>新たなシステムを先行して体験できます。こちらもおすすめはしません。</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- チーム -->
+  <section id="team" class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="section-kicker mono">// TEAM ARIX</div>
+        <h2>開発チーム - Arix</h2>
+      </div>
+      <div class="grid2">
+        <div class="win card">
+          <div class="win-bar"><div class="win-dots"><span></span><span></span><span></span></div><div class="win-title mono">members.json</div></div>
+          <div class="win-body">
+            <h3>チーム構成</h3>
+            <p>我々は中高生で構成されています。</p>
+            <p class="team-quote">ときに過ちを犯す可能性があります。その時はやさしく教えてください。</p>
+          </div>
+        </div>
+        <div class="win card">
+          <div class="win-bar"><div class="win-dots"><span></span><span></span><span></span></div><div class="win-title mono">contact.json</div></div>
+          <div class="win-body">
+            <h3>カスタマーアシスタント</h3>
+            <p>お気軽にお問い合わせください（Xにて）。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-inner">
+      <div class="footer-brand"><span class="brand-mark"></span>AeroNix OS Project</div>
+      <a class="btn btn-accent" href="https://discord.gg/6HhSrXMFnX" target="_blank" rel="noopener">公式Discordに参加</a>
+    </div>
+    <p class="note">このページでは最新情報を発信します。</p>
+  </div>
+</footer>
+
+<script>
+  var burger = document.getElementById('burgerBtn');
+  if(burger){
+    burger.addEventListener('click', function(){
+      document.body.classList.toggle('nav-open');
+    });
+    document.querySelectorAll('nav.mainnav a').forEach(function(a){
+      a.addEventListener('click', function(){ document.body.classList.remove('nav-open'); });
+    });
+  }
+  var themeBtn = document.getElementById('themeToggle');
+  if(themeBtn){
+    themeBtn.addEventListener('click', function(){
+      var root = document.documentElement;
+      var current = root.getAttribute('data-theme');
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var effectiveDark = current ? current === 'dark' : prefersDark;
+      root.setAttribute('data-theme', effectiveDark ? 'light' : 'dark');
+    });
+  }
+</script>
+
+</body>
+</html>
